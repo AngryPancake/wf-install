@@ -301,6 +301,7 @@ function install_ignis {
     meson setup build --prefix=/usr
     meson compile -C build
     $SUDO meson install -C build
+    $SUDO sudo ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/Gvc-1.0.typelib /usr/lib/girepository-1.0/
 }
 
 
