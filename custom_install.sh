@@ -292,16 +292,17 @@ function install_eww {
 
 function install_ignis {
     banner
-    check_download ignis ignis-sh
-    cd "$BUILDROOT/ignis"
-    pip install . --break-system-packages 
-    cd "$BUILDROOT"
+    # check_download ignis ignis-sh
+    # cd "$BUILDROOT/ignis"
+    # pip install . --break-system-packages 
+    # cd "$BUILDROOT"
     check_download ignis-gvc ignis-sh
     cd "$BUILDROOT/ignis-gvc"
     meson setup build --prefix=/usr
     meson compile -C build
     $SUDO meson install -C build
-    $SUDO sudo ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/Gvc-1.0.typelib /usr/lib/girepository-1.0/
+    # $SUDO ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/Gvc-1.0.typelib /usr/lib/girepository-1.0/
+    # $SUDO ln -s /usr/lib64/ignis-gvc/Gvc-1.0.typelib /usr/lib/girepository-1.0/
 }
 
 
