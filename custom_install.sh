@@ -123,7 +123,12 @@ check_download() {
 
     # Checkout the correct stream
     cd "$repo"
-    git checkout "origin/${STREAM}"
+    orig_master_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@")
+    if [[ $STREAM = "master" ]]; then
+        git checkout "origin/${orig_master_branch}"
+    else
+        git checkout "origin/${STREAM}"
+    fi
 }
 
 function install_wayfire {
@@ -207,6 +212,22 @@ function install_pixdecor {
     $SUDO ninja -C build install
 }
 
+function install_wpaperd {
+    check_download wpaperd danyspin97
+    cd "$BUILDROOT/wpaperd"
+    cargo build --release
+    cargo install --path daemon
+    cargo install --path cli
+}
+
+function install_eww {
+    check_download eww elkowar
+    cd "$BUILDROOT/eww"
+    cargo build --release --no-default-features --features=wayland
+    chmod +x ./target/release/eww
+    $SUDO install -m 755 "./target/release/eww" -t /usr/bin/
+}
+
 SESSIONS_DIR=/usr/share/wayland-sessions/
 SUDO_FOR_SESSIONS=sudo
 if [ -w $SESSIONS_DIR ] || ! which sudo > /dev/null; then
@@ -225,6 +246,8 @@ install_wayfire
 install_wayfire_desktop
 install_wayfire_plugins_extra
 install_pixdecor
+install_wpaperd
+install_eww
 if [ "${WCM}" == "yes" ]; then
     install_wcm
 fi
