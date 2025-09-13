@@ -28,7 +28,7 @@ if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
         fontconfig libfontconfig-dev libffi-dev libxkbcommon-x11-dev \
         libxkbregistry-dev libudev-dev libseat-dev libegl1-mesa-dev \
         glslang-tools libinput-bin libavutil-dev libavcodec-dev libavformat-dev \
-        libxcb-ewmh2 libtomlplusplus-dev libre2-dev
+        libxcb-ewmh2 libtomlplusplus-dev libre2-dev libgtkmm-4.0-0 libgtkmm-4.0-dev
 
 elif [[ "$OS" == "fedora" ]]; then
     echo "Устанавливаем зависимости для Fedora..."
@@ -43,7 +43,7 @@ elif [[ "$OS" == "fedora" ]]; then
         meson wget @development-tools ninja-build cmake cmake-data gettext fontconfig-devel \
         libffi-devel libxkbcommon-x11-devel libxkbregistry-devel systemd-devel \
         libseat-devel glslang libinput ffmpeg-libs re2-devel \
-        tomlplusplus-devel
+        tomlplusplus-devel gtkmm4.0-devel gtkmm4.0
 else
     echo "Неподдерживаемая ОС: $OS"
     echo "Поддерживаются только Ubuntu/Debian и Fedora."

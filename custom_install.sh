@@ -212,6 +212,36 @@ function install_pixdecor {
     $SUDO ninja -C build install
 }
 
+function install_wf-info {
+    check_download wf-info soreau
+    cd "$BUILDROOT/wf-info"
+    PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
+    ninja -C build
+    $SUDO ninja -C build install
+}
+
+function install_wf-live-previews {
+    check_download wf-live-previews soreau
+    cd "$BUILDROOT/wf-live-previews"
+    PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
+    ninja -C build
+    $SUDO ninja -C build install
+}
+
+function install_wf-panel-focus {
+    check_download wf-panel-focus soreau
+    cd "$BUILDROOT/wf-panel-focus"
+    PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
+    ninja -C build
+    $SUDO ninja -C build install
+}
+
+function install_pywayfire {
+    check_download pywayfire
+    cd "$BUILDROOT/pywayfire"
+    python3 -m pip install . --break-system-packages
+}
+
 function install_wpaperd {
     check_download wpaperd danyspin97
     cd "$BUILDROOT/wpaperd"
@@ -259,8 +289,13 @@ install_wayfire
 install_wayfire_desktop
 install_wayfire_plugins_extra
 install_pixdecor
+install_wf-info
+install_wf-live-previews
+install_wf-panel-focus
+install_pywayfire
 install_wpaperd
-install_eww
+install_ignis
+# install_eww
 if [ "${WCM}" == "yes" ]; then
     install_wcm
 fi
