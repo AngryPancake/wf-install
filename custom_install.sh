@@ -292,9 +292,12 @@ function install_eww {
 
 function install_ignis {
     banner
-    # check_download ignis ignis-sh
-    # cd "$BUILDROOT/ignis"
-    # pip install . --break-system-packages 
+    check_download ignis ignis-sh
+    cd "$BUILDROOT/ignis"
+    pip install . --break-system-packages 
+    curl -s https://api.github.com/repos/sass/dart-sass/releases/latest | grep "browser_download_url" | grep "linux-x64.tar.gz" | cut -d '"' -f 4 | wget -i -
+    $SUDO tar -xzf dart-sass*-linux-x64.tar.gz -C /opt/
+    $SUDO ln -s /opt/dart-sass/sass /usr/local/bin/sass
     # cd "$BUILDROOT"
     check_download ignis-gvc ignis-sh
     cd "$BUILDROOT/ignis-gvc"
