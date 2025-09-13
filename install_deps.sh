@@ -43,7 +43,7 @@ elif [[ "$OS" == "fedora" ]]; then
         meson wget @development-tools ninja-build cmake cmake-data gettext fontconfig-devel \
         libffi-devel libxkbcommon-x11-devel libxkbregistry-devel systemd-devel \
         libseat-devel glslang libinput ffmpeg-libs re2-devel \
-        tomlplusplus-devel gtkmm4.0-devel gtkmm4.0
+        tomlplusplus-devel gtkmm4.0-devel gtkmm4.0 gobject-introspection-devel 
 else
     echo "Неподдерживаемая ОС: $OS"
     echo "Поддерживаются только Ubuntu/Debian и Fedora."

@@ -23,10 +23,11 @@ STREAM=master
 USE_SYSTEM_WLROOTS=disabled
 BUILDPARAMS="-Dbuildtype=debugoptimized"
 WCM=no
+QUIET=yes
 
 # Temporarily disable exit on error
 set +e
-options="$(getopt -o hvcs:p:do --long verbose --long clean --long stream: --long prefix: --long wcm: --long system-wlroots --long debug --long optimize -- "$@")"
+options="$(getopt -o hvcs:p:do --long verbose --long clean --long stream: --long prefix: --long wcm: --long system-wlroots --long debug --long optimize --long quiet -- "$@")"
 ERROR_CODE="$?"
 set -e
 
@@ -51,6 +52,10 @@ while true; do
         -p|--prefix)
             shift
             PREFIX="$1"
+            ;;
+        -q|--quiet)
+            shift
+            quiet="$1"
             ;;
         -w|--wcm)
             shift
@@ -110,7 +115,19 @@ fi
 # First step, clone necessary repositories
 
 # First argument: name of the repository to clone
+
+function banner() {
+    line="=============================="
+    local func_name="${FUNCNAME[1]}"
+    echo -e $line"\n\n⚙️\t"$func_name "\n\n"$line
+
+}
+
 check_download() {
+    if [[ $QUIET = "yes" ]];then
+        local quiet_flag="--quiet"
+        echo "git clone $1"
+    fi
     cd "$BUILDROOT"
 
     local repo="$1"
@@ -118,34 +135,39 @@ check_download() {
 
     if [ ! -d "$repo" ] || [ "$CLEANBUILD" = 1 ]; then
         rm -rf "$repo"
-        git clone "https://github.com/$user/$repo"
+        git clone "https://github.com/$user/$repo" $quiet_flag
     fi
 
     # Checkout the correct stream
     cd "$repo"
     orig_master_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@")
     if [[ $STREAM = "master" ]]; then
-        git checkout "origin/${orig_master_branch}"
+        git checkout "origin/${orig_master_branch}" $quiet_flag
     else
-        git checkout "origin/${STREAM}"
+        git checkout "origin/${STREAM}" $quiet_flag
     fi
 }
 
 function install_wayfire {
+    banner
     check_download wayfire
     check_download wf-shell
-
+    if [ "$QUIET" = "yes" ]; then
+        quiet_flag="2&1 >/dev/null"
+    else
+        quiet_flag=""
+    fi
     cd "$BUILDROOT/wayfire"
 
-    meson build --prefix="${PREFIX}" $BUILDPARAMS -Duse_system_wfconfig=disabled -Duse_system_wlroots="${USE_SYSTEM_WLROOTS}"
+    meson build --prefix="${PREFIX}" $BUILDPARAMS -Duse_system_wfconfig=disabled -Duse_system_wlroots="${USE_SYSTEM_WLROOTS}" 
     ninja -C build
-    $SUDO ninja -C build install
+    $SUDO ninja -C build install 
     DEST_LIBDIR="$(meson configure | grep "\<libdir\>" | awk '{print $2}')"
 
     cd "$BUILDROOT/wf-shell"
-    PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson build --prefix="${PREFIX}" $BUILDPARAMS
-    ninja -C build
-    $SUDO ninja -C build install
+    PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson build --prefix="${PREFIX}" $BUILDPARAMS 
+    ninja -C build 
+    $SUDO ninja -C build install 
 
     if ! pkg-config --exists libsystemd && ! pkg-config --exists libelogind && pkg-config --exists libcap; then
         $SUDO setcap cap_sys_admin=eip "$PREFIX/bin/wayfire"
@@ -155,6 +177,7 @@ function install_wayfire {
 # First argument is the name of the file
 # Second argument is the name of the template
 function install_config {
+    banner
     CONFIG_FILE="$BUILDROOT/$1"
     cp "$2" "$CONFIG_FILE"
 
@@ -189,6 +212,7 @@ $SUDO install -m 755 "$BUILDROOT/start_wayfire.sh" "$PREFIX/bin/startwayfire"
 
 # ask_confirmation "Do you want to install wayfire-plugins-extra? [y/n]? "
 function install_wayfire_plugins_extra {
+    banner
     check_download wayfire-plugins-extra
     cd "$BUILDROOT/wayfire-plugins-extra"
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
@@ -197,6 +221,7 @@ function install_wayfire_plugins_extra {
 }
 
 function install_wcm {
+    banner
     check_download wcm
     cd "$BUILDROOT/wcm"
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
@@ -205,6 +230,7 @@ function install_wcm {
 }
 
 function install_pixdecor {
+    banner
     check_download pixdecor soreau
     cd "$BUILDROOT/pixdecor"
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
@@ -212,7 +238,8 @@ function install_pixdecor {
     $SUDO ninja -C build install
 }
 
-function install_wf-info {
+function install_wf_info {
+    banner
     check_download wf-info soreau
     cd "$BUILDROOT/wf-info"
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
@@ -220,7 +247,8 @@ function install_wf-info {
     $SUDO ninja -C build install
 }
 
-function install_wf-live-previews {
+function install_wf_live_previews {
+    banner
     check_download wf-live-previews soreau
     cd "$BUILDROOT/wf-live-previews"
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
@@ -228,7 +256,8 @@ function install_wf-live-previews {
     $SUDO ninja -C build install
 }
 
-function install_wf-panel-focus {
+function install_wf_panel_focus {
+    banner
     check_download wf-panel-focus soreau
     cd "$BUILDROOT/wf-panel-focus"
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${PREFIX}/${DEST_LIBDIR}/pkgconfig" meson setup build --prefix="${PREFIX}" $BUILDPARAMS
@@ -237,12 +266,14 @@ function install_wf-panel-focus {
 }
 
 function install_pywayfire {
+    banner
     check_download pywayfire
     cd "$BUILDROOT/pywayfire"
     python3 -m pip install . --break-system-packages
 }
 
 function install_wpaperd {
+    banner
     check_download wpaperd danyspin97
     cd "$BUILDROOT/wpaperd"
     cargo build --release
@@ -251,6 +282,7 @@ function install_wpaperd {
 }
 
 function install_eww {
+    banner
     check_download eww elkowar
     cd "$BUILDROOT/eww"
     cargo build --release --no-default-features --features=wayland
@@ -259,6 +291,7 @@ function install_eww {
 }
 
 function install_ignis {
+    banner
     check_download ignis ignis-sh
     cd "$BUILDROOT/ignis"
     pip install . --break-system-packages 
@@ -267,7 +300,7 @@ function install_ignis {
     cd "$BUILDROOT/ignis-gvc"
     meson setup build --prefix=/usr
     meson compile -C build
-    $SUDO  meson install -C build
+    $SUDO meson install -C build
 }
 
 
@@ -278,6 +311,7 @@ if [ -w $SESSIONS_DIR ] || ! which sudo > /dev/null; then
 fi
 
 function install_wayfire_desktop {
+    banner
     cp "$BUILDROOT/wayfire.desktop.in" "$BUILDROOT/wayfire.desktop"
     sed -i "s@^Exec.*@Exec=$PREFIX/bin/startwayfire@g" "$BUILDROOT/wayfire.desktop"
     sed -i "s@^Icon.*@Icon=$PREFIX/share/wayfire/icons/wayfire.png@g" "$BUILDROOT/wayfire.desktop"
@@ -285,15 +319,15 @@ function install_wayfire_desktop {
     $SUDO_FOR_SESSIONS install -m 644 "$BUILDROOT/wayfire.desktop" "$SESSIONS_DIR"
 }
 
-install_wayfire
-install_wayfire_desktop
-install_wayfire_plugins_extra
-install_pixdecor
-install_wf-info
-install_wf-live-previews
-install_wf-panel-focus
-install_pywayfire
-install_wpaperd
+# install_wayfire
+# install_wayfire_desktop
+# install_wayfire_plugins_extra
+# install_pixdecor
+# install_wf_info
+# install_wf_live_previews
+# install_wf_panel_focus
+# install_pywayfire
+# install_wpaperd
 install_ignis
 # install_eww
 if [ "${WCM}" == "yes" ]; then
