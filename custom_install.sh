@@ -304,8 +304,16 @@ function install_ignis {
     meson setup build --prefix=/usr
     meson compile -C build
     $SUDO meson install -C build
-    # $SUDO ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/Gvc-1.0.typelib /usr/lib/girepository-1.0/
-    # $SUDO ln -s /usr/lib64/ignis-gvc/Gvc-1.0.typelib /usr/lib/girepository-1.0/
+    $SUDO mkdir /usr/lib/ignis-gvc/
+    $SUDO ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/Gvc-1.0.typelib /usr/lib/ignis-gvc/
+    $SUDO ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/libgvc.so /usr/lib/ignis-gvc/
+    if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
+        $SUDO ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/Gvc-1.0.typelib /usr/local/lib/
+        $SUDO ln -s /usr/lib/x86_64-linux-gnu/ignis-gvc/libgvc.so /usr/local/lib/
+    elif [ -d "/usr/lib64" ]; then
+        $SUDO ln -s /usr/lib64/ignis-gvc/libgvc.so /usr/local/lib/
+        $SUDO ln -s /usr/lib64/ignis-gvc/Gvc-1.0.typelib /usr/local/lib/
+    fi
 }
 
 
@@ -324,15 +332,15 @@ function install_wayfire_desktop {
     $SUDO_FOR_SESSIONS install -m 644 "$BUILDROOT/wayfire.desktop" "$SESSIONS_DIR"
 }
 
-# install_wayfire
-# install_wayfire_desktop
-# install_wayfire_plugins_extra
-# install_pixdecor
-# install_wf_info
-# install_wf_live_previews
-# install_wf_panel_focus
-# install_pywayfire
-# install_wpaperd
+install_wayfire
+install_wayfire_desktop
+install_wayfire_plugins_extra
+install_pixdecor
+install_wf_info
+install_wf_live_previews
+install_wf_panel_focus
+install_pywayfire
+install_wpaperd
 install_ignis
 # install_eww
 if [ "${WCM}" == "yes" ]; then
